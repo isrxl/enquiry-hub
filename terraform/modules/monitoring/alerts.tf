@@ -26,8 +26,11 @@ resource "azurerm_monitor_metric_alert" "function_failures" {
   resource_group_name = var.resource_group_name
 
   # Scope is set to the resource group so the alert covers all Function Apps.
-  # Narrow this to a specific Function App resource ID after compute deploys.
-  scopes = ["/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resource_group_name}"]
+  # target_resource_type and target_resource_location are required when scoping
+  # to a resource group rather than a specific resource ID.
+  scopes                   = ["/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resource_group_name}"]
+  target_resource_type     = "Microsoft.Web/sites"
+  target_resource_location = var.location
 
   description = "Fires when Function App failures exceed 5 in 5 minutes."
   severity    = 2 # Warning
@@ -58,11 +61,13 @@ resource "azurerm_monitor_metric_alert" "function_failures" {
 # Alert: Cosmos DB 429 (throttled) requests > 10 in 5 minutes
 # Indicates the serverless RU budget is being exhausted; consider capacity tuning.
 resource "azurerm_monitor_metric_alert" "cosmos_throttled" {
-  name                = "alert-cosmos-throttle-${var.environment}"
-  resource_group_name = var.resource_group_name
-  scopes              = ["/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resource_group_name}"]
-  description         = "Fires when Cosmos DB returns >10 throttled requests in 5 minutes."
-  severity            = 2
+  name                     = "alert-cosmos-throttle-${var.environment}"
+  resource_group_name      = var.resource_group_name
+  scopes                   = ["/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resource_group_name}"]
+  target_resource_type     = "Microsoft.DocumentDB/databaseAccounts"
+  target_resource_location = var.location
+  description              = "Fires when Cosmos DB returns >10 throttled requests in 5 minutes."
+  severity                 = 2
 
   criteria {
     metric_namespace = "Microsoft.DocumentDB/databaseAccounts"
@@ -92,11 +97,13 @@ resource "azurerm_monitor_metric_alert" "cosmos_throttled" {
 # auto_mitigate = false — DLQ messages require manual investigation and replay;
 # the alert must be resolved explicitly, not dismissed when depth drops.
 resource "azurerm_monitor_metric_alert" "servicebus_dlq" {
-  name                = "alert-sb-dlq-${var.environment}"
-  resource_group_name = var.resource_group_name
-  scopes              = ["/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resource_group_name}"]
-  description         = "Fires when the Service Bus dead-letter queue contains at least one message."
-  severity            = 1 # Error
+  name                     = "alert-sb-dlq-${var.environment}"
+  resource_group_name      = var.resource_group_name
+  scopes                   = ["/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resource_group_name}"]
+  target_resource_type     = "Microsoft.ServiceBus/namespaces"
+  target_resource_location = var.location
+  description              = "Fires when the Service Bus dead-letter queue contains at least one message."
+  severity                 = 1 # Error
 
   criteria {
     metric_namespace = "Microsoft.ServiceBus/namespaces"
@@ -119,11 +126,13 @@ resource "azurerm_monitor_metric_alert" "servicebus_dlq" {
 # Uses GatewayResponseCodeCategory dimension to match all 4xx and 5xx responses.
 # A sustained error rate indicates misconfiguration, an outage, or an attack.
 resource "azurerm_monitor_metric_alert" "apim_errors" {
-  name                = "alert-apim-errors-${var.environment}"
-  resource_group_name = var.resource_group_name
-  scopes              = ["/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resource_group_name}"]
-  description         = "Fires when APIM returns more than 10 4xx or 5xx responses in 5 minutes."
-  severity            = 2 # Warning
+  name                     = "alert-apim-errors-${var.environment}"
+  resource_group_name      = var.resource_group_name
+  scopes                   = ["/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resource_group_name}"]
+  target_resource_type     = "Microsoft.ApiManagement/service"
+  target_resource_location = var.location
+  description              = "Fires when APIM returns more than 10 4xx or 5xx responses in 5 minutes."
+  severity                 = 2 # Warning
 
   criteria {
     metric_namespace = "Microsoft.ApiManagement/service"

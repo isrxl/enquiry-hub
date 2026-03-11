@@ -25,17 +25,18 @@ resource "azurerm_storage_account" "functions" {
   allow_nested_items_to_be_public = false
 }
 
-# ── Service Plan — Linux Consumption (Y1) ────────────────────────────────────
-# Y1 = serverless; billing is per-execution with a generous free tier.
-# Switch to EP1 (Elastic Premium) if VNET integration + cold-start avoidance
-# are required in production.
+# ── Service Plan — Linux Basic (B1) ──────────────────────────────────────────
+# B1 = dedicated Basic tier; required for regional VNet integration on Linux.
+# The Linux Consumption plan (Y1) does NOT support VNet integration, so B1 is
+# the lowest-cost SKU that allows the Function App to reach private endpoints.
+# Approx. cost: ~$13 AUD/month. Upgrade to EP1 for auto-scaling in production.
 
 resource "azurerm_service_plan" "main" {
   name                = "asp-${var.project_name}-${var.environment}"
   resource_group_name = var.resource_group_name
   location            = var.location
   os_type             = "Linux"
-  sku_name            = "Y1" # Consumption plan
+  sku_name            = "B1"
 }
 
 # ── Linux Function App ────────────────────────────────────────────────────────

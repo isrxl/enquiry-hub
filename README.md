@@ -122,7 +122,7 @@ Set `messaging_path` in `terraform.tfvars` before first deploy. No code changes 
 
 | Resource | Approx. monthly cost |
 |----------|---------------------|
-| Azure Functions (Consumption) | ~$0 (free tier) |
+| Azure Functions (Basic B1) | ~$13/month |
 | Cosmos DB Serverless | ~$1–5 |
 | Service Bus Standard | ~$10 |
 | Azure OpenAI (GPT-4o) | Pay-per-token |

@@ -28,3 +28,13 @@ resource "azurerm_key_vault" "main" {
   soft_delete_retention_days = 90
   purge_protection_enabled   = true
 }
+
+# Grant the Terraform deploying identity (GitHub Actions service principal)
+# Secrets Officer so it can write the Event Grid key secret during apply.
+# Without this, azurerm_key_vault_secret creation returns 403 because the
+# Key Vault uses RBAC authorization (not access policies).
+resource "azurerm_role_assignment" "terraform_kv_secrets_officer" {
+  scope                = azurerm_key_vault.main.id
+  role_definition_name = "Key Vault Secrets Officer"
+  principal_id         = data.azurerm_client_config.current.object_id
+}

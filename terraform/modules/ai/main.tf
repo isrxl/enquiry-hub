@@ -17,6 +17,10 @@ resource "azurerm_cognitive_account" "openai" {
   kind                = "OpenAI"
   sku_name            = "S0"
 
+  # Required by Azure when private_endpoint is attached — the subdomain becomes
+  # part of the private DNS name (oai-enquiryhub-dev.openai.azure.com).
+  custom_subdomain_name = "oai-${var.project_name}-${var.environment}"
+
   # Disable public access — the Function App reaches OpenAI via private endpoint.
   public_network_access_enabled = false
 

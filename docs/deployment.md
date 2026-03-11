@@ -11,7 +11,7 @@ Steps to provision infrastructure and deploy the application for the first time.
 | Azure CLI | `az login` completed with a subscription set |
 | Terraform | >= 1.5 |
 | GitHub CLI | `gh auth login` completed |
-| Azure AD role | **Application Developer** (or `Application.ReadWrite.OwnedBy` with admin consent) — required to create the Entra ID app registration for SWA auth |
+| Azure AD role | **Application Developer** (or `Application.ReadWrite.OwnedBy` with admin consent) — required to create the Entra ID app registration for SWA auth. **This role must be granted to the GitHub Actions service principal**, not just your personal account. |
 
 The Terraform state storage account (`enquiryhubx7qp9mk` in `rg-terraform-state`) must already exist. See the pre-requisites section in `README.md` if it does not.
 
