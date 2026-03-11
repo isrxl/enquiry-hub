@@ -17,3 +17,8 @@ local.settings.json
 # General
 .env
 .DS_Store
+
+# Claude
+.claude/
+CLAUDE_CODE_INSTRUCTIONS.md
+
