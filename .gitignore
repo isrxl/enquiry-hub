@@ -1,0 +1,19 @@
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+*.tfvars
+!*.tfvars.example
+
+# Python
+__pycache__/
+.venv/
+*.pyc
+*.pyo
+
+# Azure Functions
+local.settings.json
+
+# General
+.env
+.DS_Store

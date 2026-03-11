@@ -1,0 +1,8 @@
+azure-functions
+azure-cosmos
+azure-identity
+azure-eventgrid
+openai
+azure-servicebus
+azure-storage-queue
+requests

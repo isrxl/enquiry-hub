@@ -1,0 +1,19 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is gitignored — never commit it.
+
+# Project settings
+project_name = "enquiryhub"
+environment  = "dev"
+location     = "australiaeast"
+
+# Messaging path: "standard" | "premium" | "storagequeue"
+messaging_path = "standard"
+
+# Azure OpenAI model deployment name
+openai_model = "gpt-4o"
+
+# APIM publisher contact email
+apim_publisher_email = "you@yourdomain.com"
+
+# Email address for Azure Monitor action group + Sentinel alert notifications
+alert_email = "you@yourdomain.com"
