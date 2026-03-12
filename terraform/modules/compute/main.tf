@@ -152,6 +152,86 @@ resource "azurerm_api_management" "main" {
   }
 }
 
+data "azurerm_function_app_host_keys" "main" {
+  name                = azurerm_linux_function_app.main.name
+  resource_group_name = var.resource_group_name
+}
+
+resource "azurerm_api_management_named_value" "function_host_key" {
+  name                = "function-host-key"
+  api_management_name = azurerm_api_management.main.name
+  resource_group_name = var.resource_group_name
+  display_name        = "function-host-key"
+  secret              = true
+  value               = data.azurerm_function_app_host_keys.main.default_function_key
+}
+
+resource "azurerm_api_management_api" "enquiry" {
+  name                = "enquiry-api"
+  resource_group_name = var.resource_group_name
+  api_management_name = azurerm_api_management.main.name
+  revision            = "1"
+  display_name        = "Enquiry Hub API"
+  path                = "enquiry"
+  protocols           = ["https"]
+  service_url         = "https://${azurerm_linux_function_app.main.default_hostname}/api"
+}
+
+resource "azurerm_api_management_api_operation" "submit_enquiry" {
+  operation_id        = "submit-enquiry"
+  api_name            = azurerm_api_management_api.enquiry.name
+  api_management_name = azurerm_api_management.main.name
+  resource_group_name = var.resource_group_name
+  display_name        = "Submit enquiry"
+  method              = "POST"
+  url_template        = "/submit"
+
+  request {
+    representation {
+      content_type = "application/json"
+    }
+  }
+
+  response {
+    status_code = 202
+    description = "Accepted"
+  }
+
+  response {
+    status_code = 400
+    description = "Bad Request"
+  }
+}
+
+resource "azurerm_api_management_api_operation_policy" "submit_enquiry" {
+  api_name            = azurerm_api_management_api.enquiry.name
+  api_management_name = azurerm_api_management.main.name
+  resource_group_name = var.resource_group_name
+  operation_id        = azurerm_api_management_api_operation.submit_enquiry.operation_id
+
+  xml_content = <<XML
+<policies>
+  <inbound>
+    <base />
+    <set-header name="x-functions-key" exists-action="override">
+      <value>{{function-host-key}}</value>
+    </set-header>
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>
+XML
+
+  depends_on = [azurerm_api_management_named_value.function_host_key]
+}
+
 # ── Event Grid Topic ──────────────────────────────────────────────────────────
 # The process_enquiry function publishes a "Critical" event here whenever
 # urgency == "Critical". A Logic App subscribes and sends an email alert.
