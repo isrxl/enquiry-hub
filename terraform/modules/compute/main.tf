@@ -183,6 +183,12 @@ resource "azuread_application" "swa_auth" {
   display_name     = "swa-${var.project_name}-staffportal-${var.environment}"
   sign_in_audience = "AzureADMyOrg" # Single-tenant — your organisation only
 
+  # Explicitly retain the deploying SP as owner so subsequent Terraform
+  # operations (add password, update redirect URIs) succeed under
+  # Application.ReadWrite.OwnedBy. Without this, the provider removes the
+  # implicitly-set owner on the next apply and the SP loses write access.
+  owners = [data.azuread_client_config.current.object_id]
+
   required_resource_access {
     resource_app_id = "00000003-0000-0000-c000-000000000000" # Microsoft Graph
 
