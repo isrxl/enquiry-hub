@@ -69,25 +69,16 @@ resource "azurerm_linux_function_app" "main" {
     }
 
     # ── Inbound access restrictions ──────────────────────────────────────────
-    # Default action = Deny. Only APIM (external /submit path) and the SWA
-    # runtime (internal /api/chat path) may call the Function App HTTP endpoints.
-    # Direct browser access is blocked — auth_level=FUNCTION provides a second
-    # independent control (function key required even if IP restriction passes).
-    ip_restriction_default_action = "Deny"
-
-    ip_restriction {
-      name       = "allow-apim"
-      ip_address = "${azurerm_api_management.main.public_ip_addresses[0]}/32"
-      action     = "Allow"
-      priority   = 100
-    }
-
-    ip_restriction {
-      name        = "allow-swa-linked-backend"
-      service_tag = "AzureStaticWebApps"
-      action      = "Allow"
-      priority    = 110
-    }
+    # NOTE: "AzureStaticWebApps" is NOT a valid service tag for App Service
+    # ip_restriction (it is only valid in NSG rules). Because the SWA linked
+    # backend IP range cannot be expressed as a valid App Service service tag,
+    # IP-level restriction is not applied here.
+    #
+    # Access control is enforced via:
+    #   • auth_level = FUNCTION on every endpoint (function key required)
+    #   • APIM subscription key for the external /submit path
+    #   • SWA Entra ID auth (HttpOnly cookie) for the /api/chat path
+    #   • VNET outbound routing — Function App reaches private endpoints only
   }
 
   app_settings = {

@@ -150,6 +150,11 @@ module "monitoring" {
 module "compute" {
   source = "./modules/compute"
 
+  # Ensures the Key Vault Secrets Officer role assignment (in the security module)
+  # exists before the compute module attempts to write azurerm_key_vault_secret.
+  # Azure RBAC propagation can lag a few minutes; explicit ordering reduces races.
+  depends_on = [module.security]
+
   project_name        = var.project_name
   environment         = var.environment
   location            = var.location

@@ -8,6 +8,11 @@ output "function_app_id" {
   value       = azurerm_linux_function_app.main.id
 }
 
+output "apim_id" {
+  description = "APIM resource ID. Referenced by root-level metric alert rules."
+  value       = azurerm_api_management.main.id
+}
+
 output "apim_gateway_url" {
   description = "APIM gateway URL (base URL for external API calls)."
   value       = "https://${azurerm_api_management.main.gateway_url}"

@@ -14,3 +14,8 @@ output "log_analytics_workspace_id" {
   description = "Log Analytics workspace resource ID. Used by alerts.tf and diagnostic settings."
   value       = azurerm_log_analytics_workspace.main.id
 }
+
+output "action_group_id" {
+  description = "Default action group resource ID. Referenced by root-level metric alert rules."
+  value       = azurerm_monitor_action_group.default.id
+}

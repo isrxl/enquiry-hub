@@ -42,7 +42,7 @@ resource "azurerm_cognitive_deployment" "model" {
   }
 
   # GlobalStandard: Microsoft manages capacity across regions for best availability.
-  # capacity = 10 PTUs (provisioned throughput units) — sufficient for dev workloads.
+  # capacity = 10 — token throughput units; sufficient for dev workloads.
   scale {
     type     = "GlobalStandard"
     capacity = 10
@@ -56,6 +56,11 @@ resource "azurerm_private_endpoint" "openai" {
   location            = var.location
   resource_group_name = var.resource_group_name
   subnet_id           = var.pe_subnet_id
+
+  # Wait for the model deployment to complete before creating the PE.
+  # Without this, Azure rejects the PE creation with AccountProvisioningStateInvalid
+  # because the Cognitive Services account is still in "Accepted" state.
+  depends_on = [azurerm_cognitive_deployment.model]
 
   private_service_connection {
     name                           = "psc-openai"
