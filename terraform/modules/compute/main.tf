@@ -102,10 +102,16 @@ resource "azurerm_linux_function_app" "main" {
     APPLICATIONINSIGHTS_CONNECTION_STRING = var.ai_connection_string
 
     # ── Messaging: Service Bus (paths A & B) ───────────────────────────────
-    # SERVICE_BUS_FQDN is used by the ServiceBusClient in function_app.py.
-    # Null when messaging_path = storagequeue; the trigger decorator is
-    # commented out in that case anyway (see function_app.py).
-    SERVICE_BUS_FQDN  = var.sb_fqdn
+    # SERVICE_BUS_FQDN is used directly by the ServiceBusClient SDK in
+    # _send_to_service_bus() and _get_sb_client().
+    # The __fullyQualifiedNamespace variant is required by the Service Bus
+    # trigger binding: when connection="SERVICE_BUS_FQDN" is set on the
+    # trigger decorator, the Functions host looks for
+    # SERVICE_BUS_FQDN__fullyQualifiedNamespace to activate managed identity
+    # auth. Without it, the host tries to parse SERVICE_BUS_FQDN as a
+    # connection string and fails with "could not be parsed".
+    SERVICE_BUS_FQDN                          = var.sb_fqdn
+    "SERVICE_BUS_FQDN__fullyQualifiedNamespace" = var.sb_fqdn
     SERVICE_BUS_QUEUE = "enquiry-queue"
 
     # ── Messaging: Storage Queue (path C) ──────────────────────────────────
