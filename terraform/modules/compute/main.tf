@@ -166,59 +166,13 @@ resource "azurerm_key_vault_secret" "eventgrid_key" {
   # before the secret is written; managed by rbac.tf via depends_on.
 }
 
-# ── Entra ID (Azure AD) app registration for SWA built-in authentication ─────
+# ── External Entra app registration for SWA built-in authentication ──────────
 #
-# SWA's built-in auth runtime handles the OAuth 2.0 flow entirely server-side.
-# The browser never sees tokens or API keys — the session is managed via an
-# HttpOnly cookie issued by the SWA runtime.
+# The app registration and client secret are managed outside Terraform.
+# CI passes the client_id, tenant_id, and client_secret via TF_VAR_* values.
 #
-# sign_in_audience = "AzureADMyOrg" restricts login to users in this tenant only.
-#
-# NOTE: The deploying identity needs the "Application Developer" Azure AD role
-# (or Microsoft Graph Application.ReadWrite.OwnedBy with admin consent).
-
-data "azuread_client_config" "current" {}
-
-resource "azuread_application" "swa_auth" {
-  display_name     = "swa-${var.project_name}-staffportal-${var.environment}"
-  sign_in_audience = "AzureADMyOrg" # Single-tenant — your organisation only
-
-  # Azure automatically assigns the creating principal as an owner.
-  # Do not manage owners through Terraform; PATCHing the owners collection
-  # requires broader directory permissions than Application.ReadWrite.OwnedBy.
-  lifecycle {
-    ignore_changes = [owners]
-  }
-
-  required_resource_access {
-    resource_app_id = "00000003-0000-0000-c000-000000000000" # Microsoft Graph
-
-    resource_access {
-      id   = "e1fe6dd8-ba31-4d61-89e7-88639da4683d" # User.Read (delegated)
-      type = "Scope"
-    }
-  }
-}
-
-# Client secret used by the SWA runtime to validate tokens with Entra ID.
-# Lives in SWA app_settings (server-side only — never reaches the browser).
-resource "azuread_application_password" "swa_auth" {
-  application_id    = azuread_application.swa_auth.id
-  display_name      = "swa-runtime-secret"
-  end_date = "2099-01-01T00:00:00Z" # Long-lived; rotate manually when needed
-}
-
-# Add the callback redirect URI to the app registration after the SWA hostname
-# is known — this breaks what would otherwise be a circular dependency between
-# the AAD app (needs hostname) and the SWA (needs client_id).
-resource "azuread_application_redirect_uris" "swa_auth" {
-  application_id = azuread_application.swa_auth.id
-  type           = "Web"
-
-  redirect_uris = [
-    "https://${azurerm_static_web_app.main.default_host_name}/.auth/login/aad/callback",
-  ]
-}
+# After the first SWA deployment, manually add this redirect URI to the app:
+#   https://<swa-default-hostname>/.auth/login/aad/callback
 
 # ── Azure Static Web App ───────────────────────────────────────────────────────
 # Standard SKU is required for the linked Function App backend feature.
@@ -238,9 +192,9 @@ resource "azurerm_static_web_app" "main" {
   # AZURE_CLIENT_SECRET is injected here (server-side only) and never exposed
   # to browsers or committed to source control.
   app_settings = {
-    AZURE_CLIENT_ID     = azuread_application.swa_auth.client_id
-    AZURE_CLIENT_SECRET = azuread_application_password.swa_auth.value
-    AZURE_TENANT_ID     = data.azuread_client_config.current.tenant_id
+    AZURE_CLIENT_ID     = var.swa_auth_client_id
+    AZURE_CLIENT_SECRET = var.swa_auth_client_secret
+    AZURE_TENANT_ID     = var.swa_auth_tenant_id
   }
 }
 

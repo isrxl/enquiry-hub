@@ -115,3 +115,21 @@ variable "apim_publisher_email" {
   default     = "admin@example.com"
   description = "Email address for the APIM publisher contact. Set this in terraform.tfvars."
 }
+
+variable "swa_auth_client_id" {
+  type        = string
+  sensitive   = true
+  description = "Existing Microsoft Entra app registration client ID used by Static Web Apps authentication."
+}
+
+variable "swa_auth_client_secret" {
+  type        = string
+  sensitive   = true
+  description = "Client secret for the existing Microsoft Entra app registration used by Static Web Apps authentication."
+}
+
+variable "swa_auth_tenant_id" {
+  type        = string
+  sensitive   = true
+  description = "Microsoft Entra tenant ID for the existing app registration used by Static Web Apps authentication."
+}

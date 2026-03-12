@@ -23,6 +23,11 @@ output "web_endpoint" {
   value       = module.compute.web_endpoint
 }
 
+output "swa_auth_callback_url" {
+  description = "Redirect URI to add to the external Entra app registration for SWA authentication."
+  value       = module.compute.swa_auth_callback_url
+}
+
 # Run after Terraform apply to store the token as a GitHub secret:
 #   gh secret set SWA_DEPLOYMENT_TOKEN --body "$(terraform output -raw swa_deployment_token)"
 output "swa_deployment_token" {

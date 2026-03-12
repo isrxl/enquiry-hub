@@ -11,12 +11,6 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.100"
     }
-    # azuread is used by the compute module to create the Entra ID app registration
-    # that backs Azure Static Web Apps built-in authentication.
-    azuread = {
-      source  = "hashicorp/azuread"
-      version = "~> 2.50"
-    }
   }
 
   # Remote state stored in the Azure Storage Account created in pre-requisites.
@@ -34,12 +28,6 @@ provider "azurerm" {
   # Authentication is handled via OIDC in CI (ARM_* env vars).
   # Locally, run `az login` and set ARM_SUBSCRIPTION_ID.
 }
-
-# azuread uses the same credential chain as azurerm (ARM_* env vars / az login).
-# The deploying identity needs the "Application Developer" Azure AD role
-# (or equivalent Microsoft Graph Application.ReadWrite.OwnedBy permission)
-# to create and manage Entra ID app registrations.
-provider "azuread" {}
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Shared resource group — all resources are deployed into this group.
@@ -187,4 +175,9 @@ module "compute" {
   # Monitoring
   ai_connection_string     = module.monitoring.ai_connection_string
   log_analytics_workspace_id = module.monitoring.log_analytics_workspace_id
+
+  # External Entra app registration for SWA authentication
+  swa_auth_client_id     = var.swa_auth_client_id
+  swa_auth_client_secret = var.swa_auth_client_secret
+  swa_auth_tenant_id     = var.swa_auth_tenant_id
 }
