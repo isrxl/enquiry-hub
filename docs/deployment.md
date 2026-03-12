@@ -7,7 +7,7 @@ Steps to provision infrastructure and deploy the application for the first time.
 ## Prerequisites
 
 | Requirement | Detail |
-|---|---|
+| --- | --- |
 | Azure CLI | `az login` completed with a subscription set |
 | Terraform | >= 1.5 |
 | GitHub CLI | `gh auth login` completed |
@@ -111,7 +111,7 @@ git push origin main
 The workflow runs two jobs in sequence:
 
 | Job | Action |
-|---|---|
+| --- | --- |
 | `deploy-functions` | Deploys Python Function App via `Azure/functions-action@v1` |
 | `deploy-web` | Deploys static frontend via `azure/static-web-apps-deploy@v1` |
 
@@ -130,3 +130,16 @@ The workflow runs two jobs in sequence:
 ## Re-deployment
 
 Subsequent deployments (code changes only) only require pushing to `main` — no Terraform changes needed. Run `terraform apply` again only when infrastructure changes are made.
+
+---
+
+## Recommended: Enforce PR-only workflow (post-testing)
+
+Once initial setup and testing is complete, configure GitHub branch protection to prevent direct pushes to `main`:
+
+1. Go to **GitHub → Settings → Branches → Add branch ruleset**
+2. Target branch: `main`
+3. Enable **Require a pull request before merging**
+4. Enable **Require status checks to pass** (select the `Terraform` check from `infra.yml`)
+
+This ensures `terraform plan` output is always reviewed in a PR before `terraform apply` runs on merge. The `Terraform Plan (pre-apply)` step in `infra.yml` acts as a safety net during development while direct pushes to `main` are still permitted.

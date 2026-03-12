@@ -15,8 +15,24 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  # ── Gate ──────────────────────────────────────────────────────────────────
+  # Pauses the workflow for manual approval before any deployment runs.
+  # The `environment: production` gate requires a reviewer to approve in
+  # GitHub → Environments → production before the deploy jobs start.
+  #
+  # Setup: GitHub → Settings → Environments → New environment → "production"
+  #        Add required reviewers before enabling branch protection.
+  gate:
+    name: Approve Deployment
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - run: echo "Deployment approved — proceeding with Functions and SWA deploy."
+
+  # ── Deploy: Azure Functions ───────────────────────────────────────────────
   deploy-functions:
     name: Deploy Azure Functions
+    needs: gate
     runs-on: ubuntu-latest
 
     steps:
@@ -46,8 +62,10 @@ jobs:
           scm-do-build-during-deployment: false
           enable-oryx-build: false
 
+  # ── Deploy: Static Web App ────────────────────────────────────────────────
   deploy-web:
     name: Deploy Static Web App
+    needs: gate
     runs-on: ubuntu-latest
 
     steps:

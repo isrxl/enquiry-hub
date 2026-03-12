@@ -22,8 +22,13 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  terraform:
-    name: Terraform
+  # ── Plan ──────────────────────────────────────────────────────────────────
+  # Runs on every push to main and on every PR.
+  # On push: saves a binary plan file as an artifact for the apply job.
+  # On PR:   prints the plan for review; continue-on-error so the PR is not
+  #          blocked by plan failures (reviewers can see the output and decide).
+  plan:
+    name: Terraform Plan
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -44,11 +49,57 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Terraform Plan
+      - name: Terraform Plan (PR)
         if: github.event_name == 'pull_request'
         run: terraform plan -no-color
         continue-on-error: true
 
-      - name: Terraform Apply
+      - name: Terraform Plan
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve -no-color
+        run: terraform plan -out=tfplan -no-color
+
+      - name: Upload plan artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: terraform/tfplan
+          retention-days: 1
+
+  # ── Apply ─────────────────────────────────────────────────────────────────
+  # Only runs on push to main, after plan succeeds.
+  # The `environment: production` gate pauses this job until a required
+  # reviewer approves in GitHub → Environments → production.
+  #
+  # Setup: GitHub → Settings → Environments → New environment → "production"
+  #        Add required reviewers before enabling branch protection.
+  apply:
+    name: Terraform Apply
+    needs: plan
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.5"
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Download plan artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          path: terraform
+
+      - name: Terraform Apply
+        run: terraform apply -no-color tfplan
