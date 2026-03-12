@@ -128,6 +128,13 @@ resource "azurerm_linux_function_app" "main" {
     # declared here explicitly for clarity.
     FUNCTIONS_EXTENSION_VERSION = "~4"
     FUNCTIONS_WORKER_RUNTIME    = "python"
+
+    # ── Python path ────────────────────────────────────────────────────────
+    # On Consumption (Y1) the Functions host auto-adds .python_packages to
+    # sys.path. On Basic/Dedicated (B1+) it does not — PYTHONPATH must be
+    # set explicitly so that packages installed into .python_packages during
+    # CI (pip install --target) are found at runtime.
+    PYTHONPATH = "/home/site/wwwroot/.python_packages/lib/site-packages"
   }
 }
 
