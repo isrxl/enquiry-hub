@@ -15,7 +15,7 @@ output "apim_id" {
 
 output "apim_gateway_url" {
   description = "APIM gateway URL (base URL for external API calls)."
-  value       = "https://${azurerm_api_management.main.gateway_url}"
+  value       = azurerm_api_management.main.gateway_url
 }
 
 output "web_endpoint" {
