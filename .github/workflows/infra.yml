@@ -38,10 +38,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "~1.5"
+      - name: Install Terraform
+        run: |
+          version="1.5.7"
+          curl -fsSL "https://releases.hashicorp.com/terraform/${version}/terraform_${version}_linux_amd64.zip" -o terraform.zip
+          unzip -o terraform.zip
+          sudo mv terraform /usr/local/bin/terraform
+          terraform version
 
       - name: Terraform Init
         run: terraform init
@@ -87,10 +90,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "~1.5"
+      - name: Install Terraform
+        run: |
+          version="1.5.7"
+          curl -fsSL "https://releases.hashicorp.com/terraform/${version}/terraform_${version}_linux_amd64.zip" -o terraform.zip
+          unzip -o terraform.zip
+          sudo mv terraform /usr/local/bin/terraform
+          terraform version
 
       - name: Terraform Init
         run: terraform init
