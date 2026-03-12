@@ -406,7 +406,7 @@ _COSMOS_RECENT_QUERY = (
 )
 
 
-@app.route(route="chat", methods=["POST"], auth_level=func.AuthLevel.FUNCTION)
+@app.route(route="chat", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
 def chat_endpoint(req: func.HttpRequest) -> func.HttpResponse:
     """Answer a staff question using recent enquiry data as context.
 
@@ -416,6 +416,10 @@ def chat_endpoint(req: func.HttpRequest) -> func.HttpResponse:
     Returns:
       200 { "answer": "<string>" }
       400 on validation failure
+
+    Static Web Apps route rules enforce sign-in before this endpoint is reached.
+    Keep the Functions host auth level anonymous so the linked SWA backend can
+    proxy requests without exposing a function key to the browser.
     """
     try:
         payload = req.get_json()
