@@ -141,7 +141,7 @@ module "compute" {
   # Ensures the Key Vault Secrets Officer role assignment (in the security module)
   # exists before the compute module attempts to write azurerm_key_vault_secret.
   # Azure RBAC propagation can lag a few minutes; explicit ordering reduces races.
-  depends_on = [module.security]
+  depends_on = [module.security, module.networking]
 
   project_name        = var.project_name
   environment         = var.environment
