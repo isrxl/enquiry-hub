@@ -49,6 +49,13 @@ resource "azurerm_linux_function_app" "main" {
   storage_account_name       = azurerm_storage_account.functions.name
   storage_account_access_key = azurerm_storage_account.functions.primary_access_key
 
+  lifecycle {
+    # SWA backend registration and App Service can mutate AuthV2 settings
+    # outside this configuration. Ignore those drifts so ordinary Function App
+    # updates do not fail on an invalid AuthV2 PATCH payload.
+    ignore_changes = [auth_settings_v2]
+  }
+
   # System-assigned managed identity eliminates the need for stored credentials.
   # The identity's principal_id is used by rbac.tf to assign all data-plane roles.
   identity {
