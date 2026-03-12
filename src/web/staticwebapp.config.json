@@ -4,7 +4,7 @@
       "azureActiveDirectory": {
         "userDetailsClaim": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn",
         "registration": {
-          "openIdIssuer": "https://login.microsoftonline.com/%AZURE_TENANT_ID%/v2.0",
+          "openIdIssuer": "https://login.microsoftonline.com/47d93efa-1117-4577-bdcd-55fd4b3f011a/v2.0",
           "clientIdSettingName": "AZURE_CLIENT_ID",
           "clientSecretSettingName": "AZURE_CLIENT_SECRET"
         }
