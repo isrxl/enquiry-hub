@@ -144,6 +144,11 @@ resource "azurerm_api_management" "main" {
   publisher_email     = var.apim_publisher_email
 
   sku_name = "Developer_1"
+  virtual_network_type = "External"
+
+  virtual_network_configuration {
+    subnet_id = var.apim_subnet_id
+  }
 
   # System-assigned identity allows APIM to call the Function App backend
   # using managed identity auth in the inbound policy (optional).
