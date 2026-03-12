@@ -31,7 +31,7 @@ import uuid
 from datetime import datetime, timezone
 
 import azure.functions as func
-from azure.cosmos import CosmosClient
+from azure.cosmos.cosmos_client import CosmosClient
 from azure.eventgrid import EventGridEvent, EventGridPublisherClient
 from azure.identity import DefaultAzureCredential
 from azure.servicebus import ServiceBusClient, ServiceBusMessage
