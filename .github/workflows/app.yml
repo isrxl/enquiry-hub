@@ -12,7 +12,6 @@ permissions:
   contents: read
 
 env:
-  FUNCTION_APP_NAME: func-enquiryhub-dev
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
@@ -58,7 +57,7 @@ jobs:
       - name: Deploy to Azure Functions
         uses: Azure/functions-action@v1
         with:
-          app-name: ${{ env.FUNCTION_APP_NAME }}
+          app-name: func-enquiryhub-dev
           package: src/functions
           scm-do-build-during-deployment: false
           enable-oryx-build: false
