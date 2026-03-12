@@ -1,6 +1,7 @@
 azure-functions
 azure-cosmos
 azure-identity
+cryptography<42
 azure-eventgrid
 openai
 azure-servicebus
