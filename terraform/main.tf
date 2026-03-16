@@ -24,7 +24,18 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      # Allow resource group deletion even when auto-created resources exist
+      # (e.g. "Failure Anomalies" smart detector rules created by App Insights).
+      prevent_deletion_if_contains_resources = false # change to true after dev cleanup to prevent accidental RG deletion in the future
+    }
+    key_vault {
+      # Allow Key Vault deletion without purging secrets first.
+      purge_soft_delete_on_destroy    = true
+      recover_soft_deleted_key_vaults = true
+    }
+  }
   # Authentication is handled via OIDC in CI (ARM_* env vars).
   # Locally, run `az login` and set ARM_SUBSCRIPTION_ID.
 }
